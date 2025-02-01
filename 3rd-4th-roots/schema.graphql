@@ -1,0 +1,85 @@
+
+directive @entity on OBJECT
+directive @smartDBEntity(plutusDataIsSubType: Boolean!, plutusDataIndex: Int, isNETIdUnique: Boolean!, tokenName: String!) on OBJECT
+directive @specialImports(fromSmart_db: [String], fromLucid_cardano: [String], rawImport: String) on OBJECT
+directive @index(indexName:[String]) on OBJECT
+directive @nullable on FIELD
+directive @specialType(typeName:String!) on FIELD
+directive @default(defaultValue:String!) on FIELD
+directive @convertible(params: [String]) on FIELD
+
+type Committee @entity @index(indexName:["scriptHash"]) {
+ scriptHash: String
+ revelance: Int
+}
+
+type Proposal @entity {
+ actionId: String
+ txId: String
+ status: String @nullable
+ proposedIn: Int
+ expiresAfter: Int
+ dataHash: String
+ url: String
+ deposit: String
+}
+
+type DRepVote @entity {
+ proposalActionId: String
+ keyHash: String
+ vote: String
+ dataHash: String @nullable
+ url: String @nullable
+}
+
+type StakePoolVote @entity {
+ proposalActionId: String
+ poolId: String
+ vote: String
+ dataHash: String @nullable
+ url: String @nullable
+}
+
+type CommitteeVote @entity {
+ proposalActionId: String
+ scriptHash: String
+ vote: String
+ dataHash: String @nullable
+ url: String @nullable
+}
+
+type Constitution @entity {
+ dataHash: String
+ url: String
+ script: String
+}
+
+type CurrentParameters @entity {
+ collateralPercentage: Int
+ committeeMaxTermLength: Int
+ committeeminSize: Int
+ monetaryExpansion: Float
+ treasuryCut: Float
+ maxTxSize: Int
+ txFeePerByte: Float
+}
+
+type Candidate @entity @index(indexName:["address"]) {
+ address: String
+ conditionTerm: Boolean
+ propursal: String @nullable
+}
+
+type Vote @entity {
+ propursalId: ID
+ address: String
+}
+
+
+type Query @resolvers {
+    not_used: String
+}
+
+schema {
+    query: Query
+}

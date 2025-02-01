@@ -1,0 +1,29 @@
+@use '@styles/settings/fonts';
+@use '@styles/settings/colors';
+
+:root {
+  width: 100%;
+  background: colors.$primary-background;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  text-decoration: none;
+  margin: 0;
+  border: 0;
+  list-style: none;
+  color: colors.$primary-font;
+  font: fonts.$f16-medium;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  @media (width >= 1600px) {
+    max-width: 1600px;
+    margin-left: calc((100% - 1600px)/2)!important;
+  }
+}

@@ -1,0 +1,57 @@
+@use '@styles/settings/fonts';
+@use '@styles/settings/colors';
+
+
+.header {
+  height: 120px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 20px;
+  .navSection {
+    width: calc(100% - 290px);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    .navLogo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 100%;
+      cursor: pointer;
+      .logo {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+    }
+    .nav {
+      width: calc(100% - 80px);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+      a, button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: fonts.$t16-medium;
+        &:hover {
+          color: colors.$extra-color;
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
+  .btnActions {
+    width: 250px;
+    display: flex;
+    align-items: center; 
+    justify-content: flex-end;
+  }
+}
