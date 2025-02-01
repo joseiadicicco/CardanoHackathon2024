@@ -1,0 +1,121 @@
+Objetivo:
+Crear un sistema de votación ponderado basado en criterios obtenidos de los usuarios que tienen ADA en staking o poseen ADA. Los datos necesarios serán extraídos de Blockfrost API y protegidos mediante el Midnight Proof Server (MPS).
+
+Estructura General
+
+Entradas del Sistema:
+
+1.Datos de cada usuario:
+Balance en staking.
+Tiempo de staking.
+Volumen de transacciones en el último año.
+Edad de la wallet.
+Balance general (si no está en staking).
+2.Respuestas a un formulario (puntaje de relevancia 1-10 por pregunta).
+
+Salidas:
+Clasificación ponderada de cada usuario.
+Resultado de la votación entre las opciones presentadas.
+
+Criterios de Clasificación:
+Mayor cantidad de ADA en staking con tiempo prolongado.
+Volumen de transacciones y antigüedad de la wallet.
+Sistema de puntuación que se ajustará con la participación en votaciones.
+
+
+
+
+
+
+use aiken/hash.{blake2b_256}
+use aiken/list
+use aiken/math
+use aiken/time.{PosixTime}
+use aiken/transaction.{ScriptContext}
+
+// Tipos de Datos Principales
+type UserProfile {
+    address: Address,
+    staking_balance: Int,
+    staking_time: Int,
+    tx_volume: Int,
+    wallet_age: Int,
+    general_balance: Int,
+    form_score: Int
+}
+
+type VotingOption {
+    id: Int,
+    name: String,
+    description: String,
+    total_votes: Int
+}
+
+type VotingResult {
+    options: List<VotingOption>,
+    total_participants: Int,
+    timestamp: PosixTime
+}
+
+// Constantes de Configuración
+const MAX_STAKING_WEIGHT: Int = 1_000_000
+const MAX_TX_VOLUME: Int = 1_000_000
+const MAX_WALLET_AGE: Int = 365 * 10 // 10 años
+const MIN_FORM_SCORE: Int = 1
+const MAX_FORM_SCORE: Int = 10
+
+// Función: Normalizar Peso de Staking
+fn calculate_normalized_staking_weight(staking_balance: Int, staking_time: Int) -> Int {
+    let base_weight = staking_balance * (staking_time / 30) // Normalizado a meses
+    math.min(base_weight, MAX_STAKING_WEIGHT)
+}
+
+// Función: Calcular Peso por Transacciones
+fn calculate_transaction_volume_bonus(tx_volume: Int) -> Int {
+    math.min(tx_volume / 10_000, 5)
+}
+
+// Función: Calcular Peso por Antigüedad
+fn calculate_wallet_age_bonus(wallet_age: Int) -> Int {
+    math.min(wallet_age / 365, 3)
+}
+
+// Función: Calcular Peso del Usuario
+fn calculate_user_weight(user: UserProfile) -> Int {
+    let staking_weight = calculate_normalized_staking_weight(user.staking_balance, user.staking_time)
+    let volume_bonus = calculate_transaction_volume_bonus(user.tx_volume)
+    let age_bonus = calculate_wallet_age_bonus(user.wallet_age)
+
+    staking_weight * (1 + volume_bonus) * (1 + age_bonus)
+}
+
+// Función: Validar Perfil de Usuario
+fn validate_user_profile(user: UserProfile) -> Bool {
+    user.staking_balance >= 0 &&
+    user.tx_volume <= MAX_TX_VOLUME &&
+    user.wallet_age <= MAX_WALLET_AGE &&
+    user.form_score >= MIN_FORM_SCORE &&
+    user.form_score <= MAX_FORM_SCORE
+}
+
+// Función: Calcular Resultado de Votación
+fn calculate_weighted_vote(
+    users: List<UserProfile>,
+    options: List<VotingOption>
+) -> VotingResult {
+    let total_weight = list.foldl(users, 0, fn(user, acc) { acc + calculate_user_weight(user) })
+
+    let updated_options = list.map(options, fn(option) {
+        let votes = list.foldl(users, 0, fn(user, acc) {
+            let weight = calculate_user_weight(user)
+            acc + (weight * (if option.id == 1 then 1 else 0)) / total_weight
+        })
+        VotingOption { ..option, total_votes: votes }
+    })
+
+    VotingResult {
+        options: updated_options,
+        total_participants: list.length(users),
+        timestamp: 1710000000 // Timestamp de ejemplo
+    }
+}
