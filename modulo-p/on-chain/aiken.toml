@@ -1,0 +1,23 @@
+name = "ash/lotocracy"
+version = "0.0.0"
+compiler = "v1.1.7"
+plutus = "v3"
+license = "Apache-2.0"
+description = "Aiken contracts for project 'ash/lotocracy'"
+
+[repository]
+user = "ash"
+project = "lotocracy"
+platform = "github"
+
+[[dependencies]]
+name = "aiken-lang/stdlib"
+version = "v2.1.0"
+source = "github"
+
+[[dependencies]]
+name = "cardano-miners/fortuna"
+version = "cfcd9eff7445439d25da4235e6ad4682fe2ba7ea"
+source = "github"
+
+[config]
