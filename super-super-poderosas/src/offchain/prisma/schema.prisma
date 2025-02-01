@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  address       String   @id @unique
+  miniGov       MiniGov? @relation(fields: [userMiniGovId], references: [name])
+  userMiniGovId String?
+  votes         Vote[]
+}
+
+model MiniGov {
+  name           String @id @unique
+  token          String
+  members        User[]
+  expirationDate Int // Amount of days, 1 - 60
+}
+
+model Action {
+  title     String   @default("")
+  txHash    String   @id @unique
+  index     Int
+  type_name String
+  startTime DateTime
+  votes     Vote[]
+}
+
+model Vote {
+  voteId       Int    @id @default(autoincrement())
+  type         String // YES | NO | ABSTAIN
+  votingPower  Int
+  voteUserId   String
+  voteActionId String
+  user         User   @relation(fields: [voteUserId], references: [address])
+  action       Action @relation(fields: [voteActionId], references: [txHash])
+
+  @@unique([voteUserId, voteActionId])
+}
